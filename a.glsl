@@ -131,6 +131,13 @@ vec3 colorHit(vec4 result, vec3 rd)
 			if (st.w < .5) {
 				if (stamp(xx+vec2(-.001,.01)).w > .5) shade = vec3(0.);
 			} else shade = st.xyz;
+		} else {
+			xx = prel2(vec2(.5,.15),vec2(.94,.55),threeduv);
+			// macro opportunity?
+			if (xx.x > 0. && xx.y > 0. && xx.x < 1. && xx.y < 1.) {
+				// address
+				shade *= 1.-texture2D(tex, mix(vec2(.5,.165),vec2(.77,.5),xx)).xyz;
+			}
 		}
 	}
 

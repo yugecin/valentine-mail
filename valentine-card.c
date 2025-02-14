@@ -200,8 +200,8 @@ void WinMainCRTStartup(void)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	HANDLE hFontArial = CreateFontA(-96, 0, 0, 0, FW_REGULAR, 0, 0, 0, ANSI_CHARSET, 0, 0, ANTIALIASED_QUALITY, 0, "Arial");
-	HANDLE hFontArialSmall = CreateFontA(-48, 0, 0, 0, FW_REGULAR, 0, 0, 0, ANSI_CHARSET, 0, 0, ANTIALIASED_QUALITY, 0, "Arial");
 	HANDLE hFontArialSlanted = CreateFontA(-172, 0, 0, 0, FW_BOLD, 1, 0, 0, ANSI_CHARSET, 0, 0, ANTIALIASED_QUALITY, 0, "Arial");
+	HANDLE hFontSegoeScript = CreateFontA(-48, 0, 0, 0, FW_BOLD, 0, 0, 0, ANSI_CHARSET, 0, 0, ANTIALIASED_QUALITY, 0, "Segoe Script");
 	HANDLE hFontWingdings = CreateFontA(-96, 0, 0, 0, FW_BLACK, 0, 0, 0, SYMBOL_CHARSET, 0, 0, ANTIALIASED_QUALITY, 0, "Wingdings");
 	void *pTextBitmapBits;
 	BITMAPINFO bmi;
@@ -221,7 +221,6 @@ void WinMainCRTStartup(void)
 	HANDLE hTextsBitmap = CreateDIBSection(textsDC, &bmi, DIB_RGB_COLORS, &pTextBitmapBits, 0, 0);
 
 	SelectObject(textsDC, hTextsBitmap);
-	SelectObject(textsDC, hFontArialSlanted);
 	SetBkColor(textsDC, 0);
 	SetTextColor(textsDC, 0x00FFFFFF);
 	rect.left = 0;
@@ -231,6 +230,7 @@ void WinMainCRTStartup(void)
 	FillRect(textsDC, &rect, GetStockObject(BLACK_BRUSH));
 	rect.right = 1920/2;
 	rect.bottom = 1080/2;
+	SelectObject(textsDC, hFontArialSlanted);
 	DrawTextA(textsDC, "Prior", -1, &rect, DT_SINGLELINE | DT_VCENTER);
 	rect.top = rect.bottom;
 	rect.bottom = 1080/2+1080/4;
@@ -242,7 +242,16 @@ void WinMainCRTStartup(void)
 	rect.left = rect.right;
 	rect.right *= 2;
 	rect.top = 1080/2;
-	DrawTextA(textsDC, "Cowee\nLorzensaal Cham\nDorfplatz 3\n6330 Cham\nSWITZERLAND", -1, &rect, 0);
+	SelectObject(textsDC, hFontSegoeScript);
+	DrawTextA(textsDC, "Cowee", -1, &rect, 0);
+	rect.top += 70;
+	DrawTextA(textsDC, "Lorzensaal Cham", -1, &rect, 0);
+	rect.top += 70;
+	DrawTextA(textsDC, "Dorfplatz 3", -1, &rect, 0);
+	rect.top += 70;
+	DrawTextA(textsDC, "6330 Cham", -1, &rect, 0);
+	rect.top += 70;
+	DrawTextA(textsDC, "SWITZERLAND", -1, &rect, 0);
 	rect.top = 0;
 	rect.bottom = 1080/2;
 	SelectObject(textsDC, hFontWingdings);
