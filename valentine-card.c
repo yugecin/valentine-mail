@@ -4,6 +4,7 @@
 //#define fullscreen // if omitted, consider adding 'registerclass' because the window will not be draggable nor will its buttons be responsive
 //#define registerclass
 //#define watch // watch directory for shader source file changes. on such change, will read and recompile shaders (and also minify and save back to disk)
+//#define fpslimit // limit to 10 fps
 #ifndef XRES
 #define XRES 1920
 #endif
@@ -118,6 +119,9 @@ void WinMainCRTStartup(void)
 		} structured;
 	} uniform;
 	int initialTickCount, t, i, k, glTexture, shaderIndex;
+#ifdef fpslimit
+	int lastFrameTickCount = 0;
+#endif
 
 #ifdef fullscreen
 	ChangeDisplaySettings(&dm, CDS_FULLSCREEN);
@@ -204,6 +208,14 @@ void WinMainCRTStartup(void)
 	do
 	{
 		t = GetTickCount() - initialTickCount;
+#ifdef fpslimit
+		if (uniform.structured.currently_drawing_10pct_y_until > 1.1f) {
+			if (t - lastFrameTickCount < 100) {
+				continue;
+			}
+		}
+		lastFrameTickCount = t;
+#endif
 #ifdef watch
 		if (!didWatch) {
 			if (!ReadDirectoryChangesW(hDir, watchbuffer, sizeof(watchbuffer), 0, FILE_NOTIFY_CHANGE_LAST_WRITE, 0, &dirOverlapped, 0)) {
