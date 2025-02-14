@@ -70,11 +70,11 @@ vec3 colorHit(vec4 result, vec3 rd)
 
 	switch (int(result.w)) {
 	case MAT_GRID: {
-			       float x = mod(gHitPosition.x, 4.);
-			       float y = mod(gHitPosition.y, 4.);
-			       shade = (x < .2 || y < .2 ? vec3(.3685,.5114,.6592) : vec3(.5542,.7011,.8045)) - .07 * rand(gHitPosition.xy);
-			       break;
-		       }
+		float x = mod(gHitPosition.x, 4.);
+		float y = mod(gHitPosition.y, 4.);
+		shade = (x < .2 || y < .2 ? vec3(.3685,.5114,.6592) : vec3(.5542,.7011,.8045)) - .07 * rand(gHitPosition.xy);
+		break;
+	}
 	case MAT_PAP: shade = vec3(.4647,.325,.2348); break;
 	//case MAT_PAP: shade = vec3(180.,153.,132.)/255.; break;
 	case MAT_C: shade = vec3(1.,0.,0.); break;
@@ -102,12 +102,12 @@ void main()
 	vec3 rd = rdbase*normalize(vec3(uv,1));
 	vec3 col = vec3(0.);
 
-		vec4 result = march(ro, rd, 200);
+	vec4 result = march(ro, rd, 200);
 
-		if (result.x > 0.) { // hit
-			hit = true;
-			col = colorHit(result, rd);
-		}
+	if (result.x > 0.) { // hit
+		hit = true;
+		col = colorHit(result, rd);
+	}
 	resultcol += col;
 	resultcol += texture2D(tex, uv01).xyz;
 
