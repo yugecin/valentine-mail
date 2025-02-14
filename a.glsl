@@ -4,7 +4,7 @@
 #define MAT_C 2
 #define iTime f[0].x
 layout (location=0) uniform vec4 f[2];
-layout (location=4) uniform sampler2D tex;
+uniform sampler2D tex;
 
 vec3 gHitPosition = vec3(0);
 vec3 ro = vec3(-20, 1, -70);
@@ -109,6 +109,7 @@ void main()
 			col = colorHit(result, rd);
 		}
 	resultcol += col;
+	resultcol += texture2D(tex, uv01).xyz;
 
 	c = vec4(pow(resultcol, vec3(.4545)), 1.0); // 'gamma correction' that everyone else does for some good reason probably
 }

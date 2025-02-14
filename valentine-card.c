@@ -98,9 +98,7 @@ void WinMainCRTStartup(void)
 #if defined peekmessages_extra_before_compilation || !defined nopeekmessages_during_render
 	MSG msg;
 #endif
-#ifndef fullscreen
 	RECT rect;
-#endif
 	struct pipeline pipelines[NUM_PIPELINES];
 	GLuint tmpFrag;
 
@@ -196,11 +194,62 @@ void WinMainCRTStartup(void)
 	((PFNGLUSEPROGRAMSTAGESPROC)wglGetProcAddress("glUseProgramStages"))(pipelines[0].pipeline, GL_VERTEX_SHADER_BIT, vertShader);
 	((PFNGLUSEPROGRAMSTAGESPROC)wglGetProcAddress("glUseProgramStages"))(pipelines[0].pipeline, GL_FRAGMENT_SHADER_BIT, pipelines[0].frag);
 
-	((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE0); // TODO: seems to work without, remove?
 	glGenTextures(1, &glTexture);
-	glBindTexture(GL_TEXTURE_2D, glTexture);
+	((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	HANDLE hFontArial = CreateFontA(-96, 0, 0, 0, FW_REGULAR, 0, 0, 0, ANSI_CHARSET, 0, 0, ANTIALIASED_QUALITY, 0, "Arial");
+	HANDLE hFontArialSmall = CreateFontA(-48, 0, 0, 0, FW_REGULAR, 0, 0, 0, ANSI_CHARSET, 0, 0, ANTIALIASED_QUALITY, 0, "Arial");
+	HANDLE hFontArialSlanted = CreateFontA(-172, 0, 0, 0, FW_BOLD, 1, 0, 0, ANSI_CHARSET, 0, 0, ANTIALIASED_QUALITY, 0, "Arial");
+	HANDLE hFontWingdings = CreateFontA(-96, 0, 0, 0, FW_BLACK, 0, 0, 0, SYMBOL_CHARSET, 0, 0, ANTIALIASED_QUALITY, 0, "Wingdings");
+	void *pTextBitmapBits;
+	BITMAPINFO bmi;
+	bmi.bmiHeader.biSize = sizeof(BITMAPINFO);
+	bmi.bmiHeader.biWidth = 1920;
+	bmi.bmiHeader.biHeight = 1080;
+	bmi.bmiHeader.biPlanes = 1;
+	bmi.bmiHeader.biBitCount = 32;
+	bmi.bmiHeader.biCompression = 0;
+	bmi.bmiHeader.biSizeImage = 0;
+	bmi.bmiHeader.biXPelsPerMeter = 0;
+	bmi.bmiHeader.biYPelsPerMeter = 0;
+	bmi.bmiHeader.biClrUsed = 0;
+	bmi.bmiHeader.biClrImportant = 0;
+	*(int*)&bmi.bmiColors = 0;
+	HDC textsDC = CreateCompatibleDC(0);
+	HANDLE hTextsBitmap = CreateDIBSection(textsDC, &bmi, DIB_RGB_COLORS, &pTextBitmapBits, 0, 0);
+
+	SelectObject(textsDC, hTextsBitmap);
+	SelectObject(textsDC, hFontArialSlanted);
+	SetBkColor(textsDC, 0);
+	SetTextColor(textsDC, 0x00FFFFFF);
+	rect.left = 0;
+	rect.top = 0;
+	rect.right = 1920;
+	rect.bottom = 1080;
+	FillRect(textsDC, &rect, GetStockObject(BLACK_BRUSH));
+	rect.right = 1920/2;
+	rect.bottom = 1080/2;
+	DrawTextA(textsDC, "Prior", -1, &rect, DT_SINGLELINE | DT_VCENTER);
+	rect.top = rect.bottom;
+	rect.bottom = 1080/2+1080/4;
+	SelectObject(textsDC, hFontArial);
+	DrawTextA(textsDC, "BELGIUM", -1, &rect, DT_SINGLELINE | DT_VCENTER);
+	rect.top = rect.bottom;
+	rect.bottom = 1080;
+	DrawTextA(textsDC, "14.02.2025", -1, &rect, DT_SINGLELINE | DT_VCENTER);
+	rect.left = rect.right;
+	rect.right *= 2;
+	rect.top = 1080/2;
+	DrawTextA(textsDC, "Cowee\nLorzensaal Cham\nDorfplatz 3\n6330 Cham\nSWITZERLAND", -1, &rect, 0);
+	rect.top = 0;
+	rect.bottom = 1080/2;
+	SelectObject(textsDC, hFontWingdings);
+	DrawTextA(textsDC, "*Q", -1, &rect, DT_SINGLELINE | DT_VCENTER);
+	((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1920, 1080, 0, GL_RGBA, GL_UNSIGNED_BYTE, pTextBitmapBits);
 
 	uniform.structured.currently_drawing_10pct_y_until = 0.0f;
 	uniform.structured.currently_drawing_10pct_x_until = 0.0f;
@@ -294,7 +343,7 @@ void WinMainCRTStartup(void)
 		uniform.structured.resolution_y = TEXTURE_SIZE_Y;
 		((PFNGLPROGRAMUNIFORM4FVPROC)wglGetProcAddress("glProgramUniform4fv"))(pipelines[0].frag, 0, 2, uniform.floats);
 		glRecti(-1, -1, 1, 1);
-		glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, TEXTURE_SIZE_X, TEXTURE_SIZE_Y, 0);
+		//glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, TEXTURE_SIZE_X, TEXTURE_SIZE_Y, 0);
 		if (uniform.structured.currently_drawing_10pct_y_until > 1.1f) {
 			SwapBuffers(hDC);
 		}
