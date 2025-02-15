@@ -81,7 +81,7 @@ void WinMainCRTStartup(void)
 	} // not checking for the case where the buffer isn't big enough, assuming always ok
 	HANDLE hDir = CreateFileA(currentDirectory, FILE_LIST_DIRECTORY, FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE, 0, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS /*this is the flag to open a directory lmao*/ | FILE_FLAG_OVERLAPPED, 0);
 	if (hDir == INVALID_HANDLE_VALUE) {
-		MessageBoxA(NULL, "CreateFileA failed", "oops", MB_OK);
+		MessageBoxA(NULL, "CreateFileA on working directory failed", "oops", MB_OK);
 		ExitProcess(1);
 	}
 	OVERLAPPED dirOverlapped;
@@ -416,7 +416,7 @@ const char* read_minify_write_shader_file(WCHAR *fileName)
 	heap = HeapAlloc(GetProcessHeap(), 0, filesize * 4); // filesize for minified source, filesize * 2 for minified c source, filesize for source
 	if (!heap) {
 		CloseHandle(h);
-		MessageBoxA(NULL, "Failed to HeapAlloc to recompile shader", "oops", MB_OK);
+		MessageBoxA(NULL, "Failed to HeapAlloc to read and minify shader shource", "oops", MB_OK);
 		return 0;
 	}
 	source = heap + filesize * 3;
