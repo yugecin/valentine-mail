@@ -1,17 +1,17 @@
-gcc -x c -c valentine-card.c -o valentine-card.o \
+gcc -x c -c valentine-mail.c -o valentine-mail.o \
 	-DXRES=1920 -DYRES=1080 -Dfullscreen \
 	&&
-"Crinkler\crinkler.exe" valentine-card.o \
-	/OUT:valentine-card-1080p.exe \
+"Crinkler\crinkler.exe" valentine-mail.o \
+	/OUT:valentine-mail-1080p.exe \
 	/SUBSYSTEM:WINDOWS \
 	"/LIBPATH:C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Lib" \
 	kernel32.lib user32.lib opengl32.lib gdi32.lib \
 	&&
-gcc -x c -c valentine-card.c -o valentine-card.o \
+gcc -x c -c valentine-mail.c -o valentine-mail.o \
 	-DXRES=1280 -DYRES=720 -Dmsgbox_if_shader_compilation_fails -Dregisterclass -Dwatch -Dfpslimit \
 	&&
-"Crinkler\crinkler.exe" valentine-card.o \
-	/OUT:valentine-card-720p-windowed-debug-watch.exe \
+"Crinkler\crinkler.exe" valentine-mail.o \
+	/OUT:valentine-mail-720p-windowed-debug-watch.exe \
 	/SUBSYSTEM:WINDOWS \
 	"/LIBPATH:C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Lib" \
 	kernel32.lib user32.lib opengl32.lib gdi32.lib
