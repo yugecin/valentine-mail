@@ -1,9 +1,6 @@
 #version 430
 #define MAT_GRID 0
 #define MAT_PAP 1
-#define MAT_C 2
-#define iTime f[0].x
-layout (location=0) uniform vec4 f[2];
 uniform sampler2D tex;
 
 vec3 gHitPosition = vec3(0);

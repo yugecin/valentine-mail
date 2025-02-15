@@ -28,6 +28,7 @@
 #endif
 
 #include "a.glsl.c"
+#include "b.glsl.c"
 const char *vertSource=
 	"#version 430\n"
 	"layout (location=0) in vec2 i;"
@@ -60,10 +61,10 @@ WNDCLASSEX windowClass = {0};
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 #endif
 
-#define NUM_PIPELINES 1
-struct pipeline {
-	GLuint pipeline;
-	GLuint frag;
+#define NUM_PIPELINES 2
+struct shaders {
+	GLuint pipelines[NUM_PIPELINES];
+	GLuint frags[NUM_PIPELINES];
 };
 
 //gcc+ld? int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
@@ -99,7 +100,7 @@ void WinMainCRTStartup(void)
 	MSG msg;
 #endif
 	RECT rect;
-	struct pipeline pipelines[NUM_PIPELINES];
+	struct shaders shaders;
 	GLuint tmpFrag;
 
 	DEVMODE dm = {0};
@@ -108,15 +109,14 @@ void WinMainCRTStartup(void)
 	dm.dmPelsWidth = XRES;
 	dm.dmPelsHeight = YRES;
 	union {
-		float floats[8];
+		float floats[4];
 		struct {
+			float doAA;
 			float resolution_x;
 			float resolution_y;
-			float currently_drawing_10pct_y_until;
-			float currently_drawing_10pct_x_until;
 		} structured;
 	} uniform;
-	int initialTickCount, t, i, k, glTexture, shaderIndex;
+	int initialTickCount, t, i, k, glTexture, shaderIndex, pass = 0;
 #ifdef fpslimit
 	int lastFrameTickCount = 0;
 #endif
@@ -180,19 +180,29 @@ void WinMainCRTStartup(void)
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	GLuint vertShader = ((PFNGLCREATESHADERPROGRAMVPROC)wglGetProcAddress("glCreateShaderProgramv"))(GL_VERTEX_SHADER, 1, &vertSource);
-	pipelines[0].frag = ((PFNGLCREATESHADERPROGRAMVPROC)wglGetProcAddress("glCreateShaderProgramv"))(GL_FRAGMENT_SHADER, 1, &fragSource_a);
+	shaders.frags[0] = ((PFNGLCREATESHADERPROGRAMVPROC)wglGetProcAddress("glCreateShaderProgramv"))(GL_FRAGMENT_SHADER, 1, &fragSource_a);
 #if defined msgbox_if_shader_compilation_fails || defined watch
 	programInfoLogBufUsedLength = 0;
-	((PFNGLGETPROGRAMINFOLOGPROC)wglGetProcAddress("glGetProgramInfoLog"))(pipelines[0].frag, sizeof(programInfoLogBuf), &programInfoLogBufUsedLength, programInfoLogBuf);
+	((PFNGLGETPROGRAMINFOLOGPROC)wglGetProcAddress("glGetProgramInfoLog"))(shaders.frags[0], sizeof(programInfoLogBuf), &programInfoLogBufUsedLength, programInfoLogBuf);
 	if (programInfoLogBuf[0] && programInfoLogBufUsedLength) {
 		MessageBoxA(NULL, programInfoLogBuf, "gl program info log", MB_OK);
 		goto exit;
 	}
 #endif
-	((PFNGLGENPROGRAMPIPELINESPROC)wglGetProcAddress("glGenProgramPipelines"))(1, &pipelines[0].pipeline);
-	((PFNGLBINDPROGRAMPIPELINEPROC)wglGetProcAddress("glBindProgramPipeline"))(pipelines[0].pipeline);
-	((PFNGLUSEPROGRAMSTAGESPROC)wglGetProcAddress("glUseProgramStages"))(pipelines[0].pipeline, GL_VERTEX_SHADER_BIT, vertShader);
-	((PFNGLUSEPROGRAMSTAGESPROC)wglGetProcAddress("glUseProgramStages"))(pipelines[0].pipeline, GL_FRAGMENT_SHADER_BIT, pipelines[0].frag);
+	shaders.frags[1] = ((PFNGLCREATESHADERPROGRAMVPROC)wglGetProcAddress("glCreateShaderProgramv"))(GL_FRAGMENT_SHADER, 1, &fragSource_b);
+#if defined msgbox_if_shader_compilation_fails || defined watch
+	programInfoLogBufUsedLength = 0;
+	((PFNGLGETPROGRAMINFOLOGPROC)wglGetProcAddress("glGetProgramInfoLog"))(shaders.frags[1], sizeof(programInfoLogBuf), &programInfoLogBufUsedLength, programInfoLogBuf);
+	if (programInfoLogBuf[1] && programInfoLogBufUsedLength) {
+		MessageBoxA(NULL, programInfoLogBuf, "gl program info log", MB_OK);
+		goto exit;
+	}
+#endif
+	((PFNGLGENPROGRAMPIPELINESPROC)wglGetProcAddress("glGenProgramPipelines"))(2, shaders.pipelines);
+	((PFNGLUSEPROGRAMSTAGESPROC)wglGetProcAddress("glUseProgramStages"))(shaders.pipelines[0], GL_VERTEX_SHADER_BIT, vertShader);
+	((PFNGLUSEPROGRAMSTAGESPROC)wglGetProcAddress("glUseProgramStages"))(shaders.pipelines[0], GL_FRAGMENT_SHADER_BIT, shaders.frags[0]);
+	((PFNGLUSEPROGRAMSTAGESPROC)wglGetProcAddress("glUseProgramStages"))(shaders.pipelines[1], GL_VERTEX_SHADER_BIT, vertShader);
+	((PFNGLUSEPROGRAMSTAGESPROC)wglGetProcAddress("glUseProgramStages"))(shaders.pipelines[1], GL_FRAGMENT_SHADER_BIT, shaders.frags[1]);
 
 	glGenTextures(1, &glTexture);
 	((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE0);
@@ -258,19 +268,14 @@ void WinMainCRTStartup(void)
 	DrawTextA(textsDC, "*Q", -1, &rect, DT_SINGLELINE | DT_VCENTER);
 	((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1920, 1080, 0, GL_RGBA, GL_UNSIGNED_BYTE, pTextBitmapBits);
 
-	uniform.structured.currently_drawing_10pct_y_until = 0.0f;
-	uniform.structured.currently_drawing_10pct_x_until = 0.0f;
 	initialTickCount = GetTickCount();
 	do
 	{
 		t = GetTickCount() - initialTickCount;
 #ifdef fpslimit
-		if (uniform.structured.currently_drawing_10pct_y_until > 1.1f) {
-			if (t - lastFrameTickCount < 100) {
-				continue;
-			}
+		if (t - lastFrameTickCount < 100) {
+			continue;
 		}
 		lastFrameTickCount = t;
 #endif
@@ -303,9 +308,10 @@ void WinMainCRTStartup(void)
 								MessageBoxA(NULL, programInfoLogBuf, "gl program info log", MB_OK);
 								goto compilationFailed;
 							}
-							((PFNGLUSEPROGRAMSTAGESPROC)wglGetProcAddress("glUseProgramStages"))(pipelines[shaderIndex].pipeline, GL_FRAGMENT_SHADER_BIT, tmpFrag);
-							((PFNGLDELETEPROGRAMPROC)wglGetProcAddress("glDeleteProgram"))(pipelines[shaderIndex].frag);
-							pipelines[shaderIndex].frag = tmpFrag;
+							((PFNGLUSEPROGRAMSTAGESPROC)wglGetProcAddress("glUseProgramStages"))(shaders.pipelines[shaderIndex], GL_FRAGMENT_SHADER_BIT, tmpFrag);
+							((PFNGLDELETEPROGRAMPROC)wglGetProcAddress("glDeleteProgram"))(shaders.frags[shaderIndex]);
+							shaders.frags[shaderIndex] = tmpFrag;
+							pass = 0;
 						compilationFailed:
 							HeapFree(GetProcessHeap(), 0, (void*) newFragSource);
 						}
@@ -331,14 +337,6 @@ void WinMainCRTStartup(void)
 		}
 #endif
 
-		if (uniform.structured.currently_drawing_10pct_y_until < 1.3f) {
-			uniform.structured.currently_drawing_10pct_x_until += .1f;
-			if (uniform.structured.currently_drawing_10pct_x_until > 1.2f) {
-				uniform.structured.currently_drawing_10pct_x_until = 0.f;
-				uniform.structured.currently_drawing_10pct_y_until += .1f;
-			}
-		}
-
 #ifdef fullscreen
 #define TEXTURE_SIZE_X XRES
 #define TEXTURE_SIZE_Y YRES
@@ -350,12 +348,23 @@ void WinMainCRTStartup(void)
 
 		uniform.structured.resolution_x = TEXTURE_SIZE_X;
 		uniform.structured.resolution_y = TEXTURE_SIZE_Y;
-		((PFNGLPROGRAMUNIFORM4FVPROC)wglGetProcAddress("glProgramUniform4fv"))(pipelines[0].frag, 0, 2, uniform.floats);
-		glRecti(-1, -1, 1, 1);
-		//glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, TEXTURE_SIZE_X, TEXTURE_SIZE_Y, 0);
-		if (uniform.structured.currently_drawing_10pct_y_until > 1.1f) {
-			SwapBuffers(hDC);
+		if (pass == 0) {
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1920, 1080, 0, GL_RGBA, GL_UNSIGNED_BYTE, pTextBitmapBits);
+			((PFNGLBINDPROGRAMPIPELINEPROC)wglGetProcAddress("glBindProgramPipeline"))(shaders.pipelines[0]);
+		} else {
+			uniform.structured.doAA = pass == 1 ? 1.0f : 0.0f;
+			((PFNGLPROGRAMUNIFORM4FVPROC)wglGetProcAddress("glProgramUniform4fv"))(shaders.frags[1], 0, 1, uniform.floats);
+			((PFNGLBINDPROGRAMPIPELINEPROC)wglGetProcAddress("glBindProgramPipeline"))(shaders.pipelines[1]);
 		}
+		glRecti(-1, -1, 1, 1);
+		if (pass < 2) {
+			glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, TEXTURE_SIZE_X, TEXTURE_SIZE_Y, 0);
+			pass++;
+		}
+#ifndef watch
+		if (pass == 2)
+#endif
+			SwapBuffers(hDC);
 	} while (
 		!GetAsyncKeyState(VK_ESCAPE)
 #ifdef watch
