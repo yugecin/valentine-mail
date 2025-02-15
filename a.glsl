@@ -181,7 +181,7 @@ vec3 colorHit(vec4 result, vec3 rd)
 				if (stamp(xx+vec2(-.001,.01)).w > .5) shade = vec3(0.);
 			} else shade = st.xyz;
 		} else {
-			xx = prel2(vec2(.5,.15),vec2(.94,.55),threeduv);
+			xx = prel2(vec2(.5,.11),vec2(.94,.51),threeduv);
 			// macro opportunity?
 			if (xx.x > 0. && xx.y > 0. && xx.x < 1. && xx.y < 1.) {
 				// address
