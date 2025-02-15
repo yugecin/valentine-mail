@@ -187,7 +187,8 @@ bool postmark2(vec2 uv) {
 			vec2 u = prel2(vec2(.2,.42),vec2(.7,.58),uv);
 			return texture2D(tex, mix(vec2(.0,.094),vec2(.21,.16),u)).x>.2; // date
 			//return texture2D(tex, mix(vec2(.0,.34),vec2(.19,.41),u)).x>.2; // belgium
-		} else if (w < .48) {
+		} else {
+		//} else if (w < .48) {
 			float r = atan(.5-uv.y,uv.x-.5);
 			float u = 3.14-.5;
 			if (.5 < r && r < u) {
