@@ -199,7 +199,7 @@ void WinMainCRTStartup(void)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	HANDLE hFontArial = CreateFontA(-96, 0, 0, 0, FW_REGULAR, 0, 0, 0, ANSI_CHARSET, 0, 0, ANTIALIASED_QUALITY, 0, "Arial");
+	HANDLE hFontArialBold = CreateFontA(-96, 0, 0, 0, FW_BOLD, 0, 0, 0, ANSI_CHARSET, 0, 0, ANTIALIASED_QUALITY, 0, "Arial");
 	HANDLE hFontArialSlanted = CreateFontA(-172, 0, 0, 0, FW_BOLD, 1, 0, 0, ANSI_CHARSET, 0, 0, ANTIALIASED_QUALITY, 0, "Arial");
 	HANDLE hFontSegoeScript = CreateFontA(-48, 0, 0, 0, FW_BOLD, 0, 0, 0, ANSI_CHARSET, 0, 0, ANTIALIASED_QUALITY, 0, "Segoe Script");
 	HANDLE hFontWingdings = CreateFontA(-96, 0, 0, 0, FW_BLACK, 0, 0, 0, SYMBOL_CHARSET, 0, 0, ANTIALIASED_QUALITY, 0, "Wingdings");
@@ -234,7 +234,7 @@ void WinMainCRTStartup(void)
 	DrawTextA(textsDC, "Prior", -1, &rect, DT_SINGLELINE | DT_VCENTER);
 	rect.top = rect.bottom;
 	rect.bottom = 1080/2+1080/4;
-	SelectObject(textsDC, hFontArial);
+	SelectObject(textsDC, hFontArialBold);
 	DrawTextA(textsDC, "BELGIUM", -1, &rect, DT_SINGLELINE | DT_VCENTER);
 	rect.top = rect.bottom;
 	rect.bottom = 1080;

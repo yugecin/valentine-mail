@@ -160,10 +160,44 @@ vec3 kiss(vec2 uv, vec3 shade) {
 			)
 		)
 		{
-			return shade;
+			r=shade;
 		}
 	}
 	return r;
+}
+
+bool postmark2(vec2 uv) {
+	if (uv.x < .54) {
+		uv.y = mod(uv.y,.2)-.1;
+		float w = length(uv-vec2(uv.x,.05*cos(uv.x*16.+3.)))-.002;
+		if (w < .01) {
+			return true;
+		}
+	} else {
+		uv.x = (uv.x-.6)/.36;
+		float w = length(uv-vec2(.5));
+		if (.48 < w && w < .5 || .32 < w && w < .34) {
+			return true;
+		}
+		if (w < .32) {
+			float l = abs(uv.y-.5);
+			if (.1 < l && l < .12) {
+				return true;
+			}
+			vec2 u = prel2(vec2(.2,.42),vec2(.7,.58),uv);
+			return texture2D(tex, mix(vec2(.0,.34),vec2(.19,.41),u)).x>.2;
+		}
+	}
+	return false;
+}
+vec3 postmark(vec2 uv, vec3 shade) {
+	uv*=rot2(.02);
+	if (postmark2(uv)) {
+		if (rand(floor(uv*400.)) < .7) {
+			return vec3(.05);
+		}
+	}
+	return shade;
 }
 
 vec3 colorHit(vec4 result, vec3 rd)
@@ -193,6 +227,10 @@ vec3 colorHit(vec4 result, vec3 rd)
 					shade = kiss(xx, shade);
 				}
 			}
+		}
+		xx = prel2(vec2(.57,.55),vec2(1.02,.83),threeduv);
+		if (xx.x > 0. && xx.y > 0. && xx.x < 1. && xx.y < 1.) {
+			shade = postmark(xx, shade);
 		}
 	}
 
