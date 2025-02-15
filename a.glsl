@@ -177,6 +177,10 @@ bool postmark2(vec2 uv) {
 			return true;
 		}
 		if (w < .32) {
+			if (uv.y < .38 && uv.x < .6) {
+				vec2 u = prel2(vec2(.2,.2),vec2(.7,.38),uv);
+				return texture2D(tex, mix(vec2(.45,.71),vec2(.58,.8),u.xy)).x>.2; // envelope
+			}
 			float l = abs(uv.y-.5);
 			if (.1 < l && l < .12) {
 				return true;
