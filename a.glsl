@@ -117,6 +117,55 @@ vec4 stamp(vec2 uv)
 	return vec4(s,1.);
 }
 
+float su(float a, float b, float k)
+{
+    float h = clamp(.5 + .5*(b-a)/k, .0, 1.);
+    return mix(b, a, h) - k*h*(1.-h);
+}
+float ss(float a, float b, float k)
+{
+    float h = clamp(.5 - .5*(b+a)/k, .0, 1.);
+    return mix(b, -a, h) + k*h*(1.0-h);
+}
+
+vec3 kiss2(vec2 uv, vec3 shade) {
+	float l = length(uv - vec2(.07,.5)) - .1;
+	l = su(l, length(uv-vec2(.13, .5)) - .08, .01);
+	l = su(l, length(uv-vec2(.2, .5)) - .04, .01);
+	if (l < .01) {
+		float g = length(uv-vec2(uv.x,.507+.013*sin(uv.x*18.-.7)))-.002;
+		if (g > .01) {
+			return vec3(1.,.136,.136);
+		}
+	}
+	return shade;
+}
+vec3 kiss(vec2 uv, vec3 shade) {
+	uv *= rot2(.4);
+	uv += vec2(.4,.8);
+	uv *= .5;
+	uv.x = abs(uv.x-.5);
+	vec3 r = kiss2(uv, shade);
+	if (r.x == 1.) {
+		if (
+			(
+				rand(floor(uv*200.)) < .4 // edge breaking base
+				&& (
+					kiss2(uv+vec2(0.,.005), shade).x < 1. // top
+					|| kiss2(uv+vec2(0.,-.008), shade).x < 1. // bottom
+				)
+			) || (
+				(rand(floor(uv+vec2((1.+2.*uv.y)*uv.x,uv.y)*vec2(200.,30.))) < .06) // stripes
+				&& rand(uv) < .7 // make them breaky as well
+			)
+		)
+		{
+			return shade;
+		}
+	}
+	return r;
+}
+
 vec3 colorHit(vec4 result, vec3 rd)
 {
 	vec2 xy = mod(gHitPosition.xy-vec2(5.), 4.);
@@ -137,6 +186,12 @@ vec3 colorHit(vec4 result, vec3 rd)
 			if (xx.x > 0. && xx.y > 0. && xx.x < 1. && xx.y < 1.) {
 				// address
 				shade *= 1.-texture2D(tex, mix(vec2(.5,.165),vec2(.77,.5),xx)).xyz;
+			} else {
+				xx = prel2(vec2(.1,.2),vec2(.37,.6),threeduv);
+				if (xx.x > 0. && xx.y > 0. && xx.x < 1. && xx.y < 1.) {
+					// kiss
+					shade = kiss(xx, shade);
+				}
 			}
 		}
 	}
