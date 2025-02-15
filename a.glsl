@@ -135,7 +135,7 @@ vec3 kiss2(vec2 uv, vec3 shade) {
 	if (l < .01) {
 		float g = length(uv-vec2(uv.x,.507+.013*sin(uv.x*18.-.7)))-.002;
 		if (g > .01) {
-			return vec3(1.,.136,.136);
+			return vec3(.91,.08,.08);
 		}
 	}
 	return shade;
@@ -146,16 +146,16 @@ vec3 kiss(vec2 uv, vec3 shade) {
 	uv *= .5;
 	uv.x = abs(uv.x-.5);
 	vec3 r = kiss2(uv, shade);
-	if (r.x == 1.) {
+	if (r.x > .9) {
 		if (
 			(
 				rand(floor(uv*200.)) < .4 // edge breaking base
 				&& (
-					kiss2(uv+vec2(0.,.005), shade).x < 1. // top
-					|| kiss2(uv+vec2(0.,-.008), shade).x < 1. // bottom
+					kiss2(uv+vec2(0.,.005), shade).x < .9 // top
+					|| kiss2(uv+vec2(0.,-.008), shade).x < .9 // bottom
 				)
 			) || (
-				(rand(floor(uv+vec2((1.+2.*uv.y)*uv.x,uv.y)*vec2(200.,30.))) < .06) // stripes
+				(rand(floor(uv+vec2((1.+2.*uv.y)*uv.x,uv.y)*vec2(200.,80.))) < .06) // stripes
 				&& rand(uv) < .7 // make them breaky as well
 			)
 		)
