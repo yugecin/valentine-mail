@@ -358,7 +358,7 @@ void WinMainCRTStartup(void)
 		}
 		glRecti(-1, -1, 1, 1);
 		if (pass < 2) {
-			glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, TEXTURE_SIZE_X, TEXTURE_SIZE_Y, 0);
+			glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, TEXTURE_SIZE_X, TEXTURE_SIZE_Y, 0);
 			pass++;
 		}
 #ifndef watch

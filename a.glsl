@@ -261,16 +261,14 @@ void main()
 	vec2 uv=v;uv.y/=1.77;
 	vec2 uv01= vec2((v.x + 1.) / 2., (v.y + 1.) / 2.);
 	vec3 rd = rdbase*normalize(vec3(uv,1));
-	vec3 col = vec3(0.);
 
 	vec4 result = march(ro, rd, 200);
 
 	if (result.x > 0.) { // hit
 		hit = true;
-		col = colorHit(result, rd);
+		resultcol = colorHit(result, rd);
 	}
-	resultcol += col;
 	//resultcol += texture2D(tex, uv01).xyz;
 
-	c = vec4(pow(resultcol, vec3(.4545)), 1.0); // 'gamma correction' that everyone else does for some good reason probably
+	c = vec4(pow(resultcol, vec3(.4545)), 1.); // 'gamma correction' that everyone else does for some good reason probably
 }
